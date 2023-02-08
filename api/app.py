@@ -20,7 +20,7 @@ class Sample(db.Model):
 
 
 def validate_json(json_data: dict) -> bool:
-    return any(key in json_data for key in DESIRED_KEYS)
+    return all(key in json_data for key in DESIRED_KEYS)
 
 
 @app.route('/', methods=['POST'])
