@@ -21,9 +21,6 @@ class MyTestCase(unittest.TestCase):
         for index, file in enumerate(self.files):
             if index % 2 == 0:
                 continue
-
-            if index % 5 == 0:
-                family += 1
             hash_value = LocationMonitor.get_hash_value(file)
             new_url = f"{API_URL}"
             requests.post(url=new_url, json={"hash": hash_value, "family": family})

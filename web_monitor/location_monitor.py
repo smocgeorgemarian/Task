@@ -2,6 +2,7 @@ import logging
 import os
 import hashlib
 from collections import defaultdict
+from time import sleep
 
 import requests
 
@@ -29,10 +30,11 @@ class LocationMonitor:
                 self.add_to_stats(hash_value)
 
     def add_to_stats(self, hash_value: str) -> None:
-        new_URL = f"{self.api_URL}/hash/{hash_value}"
+        new_URL = f"{self.api_URL}/hashes/{hash_value}"
         response = requests.get(new_URL)
         if response.status_code != 200:
             return
+        logging.info(f"File with hash_value {hash_value} found")
         self.families_count[response.content] += 1
 
     @staticmethod
@@ -48,10 +50,11 @@ class LocationMonitor:
 
     def run(self) -> None:
         while True:
-            self.families_count = defaultdict(lambda x: 0)
+            self.families_count = defaultdict(lambda: 0)
             try:
                 self.get_all_data()
             except Exception as e:
                 logging.warning(f"Processing at this step failed due to: {str(e)}")
             else:
                 logging.info(f"Stats are: {self.families_count}")
+            sleep(3)

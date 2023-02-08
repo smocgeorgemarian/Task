@@ -1,5 +1,6 @@
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import UniqueConstraint
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
@@ -12,6 +13,7 @@ class Sample(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     hash = db.Column(db.String(200), nullable=False)
     family = db.Column(db.String(200), nullable=False)
+    __table_args__ = (UniqueConstraint('hash', name='_hash_'),)
 
     def __repr__(self):
         return f'<File with hash {self.hash} from family {self.family}>'
