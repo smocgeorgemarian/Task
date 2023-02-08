@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test1.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test2.db'
 db = SQLAlchemy(app)
 
 DESIRED_KEYS = ["hash", "family"]
