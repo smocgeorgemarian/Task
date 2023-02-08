@@ -36,5 +36,20 @@ def add_sample():
     except Exception:
         return "Something went wrong", 500
 
+
+@app.route('/hashes/<string:hash_value>', methods=['GET'])
+def get_family_by_hash(hash_value: str):
+    sample = Sample.query.filter_by(hash=hash_value).first()
+    if sample is not None:
+        return sample.family, 200
+    return f"Sample with hash {hash_value} could not be found", 404
+
+
+@app.route('/families/<string:family>', methods=['GET'])
+def get_hashes_by_family(family: str):
+    hashes = list(map(lambda s: s.hash, Sample.query.filter_by(family=family)))
+    return hashes, 200
+
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8000, debug=True)
