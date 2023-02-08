@@ -7,6 +7,7 @@ db = SQLAlchemy(app)
 
 DESIRED_KEYS = ["hash", "family"]
 
+
 class Sample(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     hash = db.Column(db.String(200), nullable=False)
@@ -15,17 +16,18 @@ class Sample(db.Model):
     def __repr__(self):
         return f'<File with hash {self.hash} from family {self.family}>'
 
-def validate_json(json_data: dict)->bool:
+
+def validate_json(json_data: dict) -> bool:
     return any(key in json_data for key in DESIRED_KEYS)
 
 
 @app.route('/', methods=['POST'])
 def add_sample():
     json_data = request.get_json(silent=True)
-    if not validate_json():
+    if not validate_json(json_data=json_data):
         return "Bad request", 400
 
-    new_sample = Sample(json_data["hash"], json_data["family"])
+    new_sample = Sample(hash=json_data["hash"], family=json_data["family"])
 
     try:
         db.session.add(new_sample)
@@ -34,5 +36,5 @@ def add_sample():
     except Exception:
         return "Something went wrong", 500
 
-
-
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=8000, debug=True)
