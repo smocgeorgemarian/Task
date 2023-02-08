@@ -13,6 +13,7 @@ class MyTestCase(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(MyTestCase, self).__init__(*args, **kwargs)
         self.files = []
+        self.added_files = []
         for root, dirs, files in os.walk(TESTING_PATH):
             for file in files:
                 self.files.append(os.path.join(root, file))
@@ -21,12 +22,19 @@ class MyTestCase(unittest.TestCase):
         for index, file in enumerate(self.files):
             if index % 2 == 0:
                 continue
+            self.added_files.append(file)
             hash_value = LocationMonitor.get_hash_value(file)
             new_url = f"{API_URL}"
-            requests.post(url=new_url, json={"hash": hash_value, "family": family})
+            requests.post(url=new_url, json={"hash": hash_value, "family": family + str(index)})
+        self.monitor = LocationMonitor(api_url=API_URL, location=TESTING_PATH)
 
-    def test_smth(self):
-        self.assertEqual(True, True)
+    def test_when_db_is_populated_initially(self):
+        # Arrange
+
+        # Act
+        data = self.monitor.__run__()
+        # Assert
+        self.assertEqual(3, data[1][b"Family"])
 
 
 if __name__ == '__main__':

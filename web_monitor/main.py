@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def main():
-    monitor = LocationMonitor(location=os.path.join(".", "..", "resources"), api_URL="http://127.0.0.1:8000")
+    monitor = LocationMonitor(location=os.path.join(".", "..", "resources"), api_url="http://127.0.0.1:8000")
     monitor.run()
 
 

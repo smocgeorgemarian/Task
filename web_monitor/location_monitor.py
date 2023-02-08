@@ -17,13 +17,16 @@ class LocationMonitor:
     storage locations.
     """
 
-    def __init__(self, location: str, api_URL: str) -> None:
+    def __init__(self, location: str, api_url: str) -> None:
         self.location = location
-        self.api_URL = api_URL
+        self.api_URL = api_url
         self.families_count = defaultdict(lambda: 0)
+        self.total_count = 0
+        self.malwares_count = 0
 
     def get_all_data(self) -> dict:
         for root, dirs, files in os.walk(self.location, topdown=False):
+            self.total_count += len(files)
             for file in files:
                 full_path = os.path.join(root, file)
                 hash_value = self.get_hash_value(full_path=full_path)
@@ -34,6 +37,7 @@ class LocationMonitor:
         response = requests.get(new_URL)
         if response.status_code != 200:
             return
+        self.malwares_count += 1
         logging.info(f"File with hash_value {hash_value} found")
         self.families_count[response.content] += 1
 
@@ -48,13 +52,19 @@ class LocationMonitor:
                 curr_hash.update(content)
         return curr_hash.hexdigest()
 
+    def __run__(self) -> tuple:
+        self.families_count = defaultdict(lambda: 0)
+        self.total_count = 0
+        try:
+            self.get_all_data()
+        except Exception as e:
+            logging.warning(f"Processing at this step failed due to: {str(e)}")
+        else:
+            logging.info(f"Stats are: {self.malwares_count}/{self.total_count} are malwares\n"
+                         f"Distribution on families:{self.families_count}")
+        return self.malwares_count, self.families_count
+
     def run(self) -> None:
         while True:
-            self.families_count = defaultdict(lambda: 0)
-            try:
-                self.get_all_data()
-            except Exception as e:
-                logging.warning(f"Processing at this step failed due to: {str(e)}")
-            else:
-                logging.info(f"Stats are: {self.families_count}")
+            self.__run__()
             sleep(3)
