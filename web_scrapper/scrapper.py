@@ -1,37 +1,46 @@
+import re
+
 import requests as requests
-from selenium import webdriver
-from selenium.webdriver.common.by import By
 
 
 class Scrapper:
     def __init__(self, url, api_url):
-        self.URL = url
-        self.api_URL = api_url
-        self.driver = webdriver.Firefox()
-        self.processed_data = dict()
+        self.url = url
+        self.api_url = api_url
 
     def parse_data(self) -> None:
-        self.driver.get(self.URL)
-        table_rows = self.driver.find_elements(By.XPATH, '/html/body/table/tbody/tr')[1:]
-        for row in table_rows:
-            self.process_family(row)
-        self.driver.quit()
+        session_obj = requests.Session()
 
-    def process_family(self, row) -> None:
-        family = row.text.split("\n")[0]
+        response = session_obj.get(self.url)
+        content = response.text
+        table_start = content.index('id="list"')
+        data = re.findall(r"<tr>.*</tr>", content[table_start:])
+        for tag in data[2:]:
+            family_match = re.search(r"<a.*>(.*)</a>", tag)
+            family = family_match[family_match.lastindex]
+            self.process_family(family)
 
-        samples_url = f"{self.URL}{family}/Samples/"
-        samples_driver = webdriver.Firefox()
-        samples_driver.get(samples_url)
-        hashes = map(lambda x: x.text.split('\n')[0],
-                     samples_driver.find_elements(By.XPATH, '/html/body/table/tbody/tr')[1:])
-        samples_driver.quit()
-        self.processed_data[family] = hashes
+    def process_family(self, family: str) -> None:
+        pass
 
-    def pretty_print_data(self):
-        print(self.processed_data)
+        samples_url = f"{self.url}{family}/Samples/"
 
-    def add_data_to_database(self):
-        for family in self.processed_data:
-            for hash_value in self.processed_data[family]:
-                requests.post(self.api_URL, json={"hash": hash_value, "family": family})
+        session_obj = requests.Session()
+        response = session_obj.get(samples_url)
+        if response.status_code == 404:
+            samples_url = f"{self.url}{family}/"
+            session_obj = requests.Session()
+            response = session_obj.get(samples_url)
+
+        if response.status_code == 404:
+            raise Exception("Something went wrong")
+
+        content = response.text
+        table_start = content.index('id="list"')
+        data = re.findall(r"<tr>.*</tr>", content[table_start:])
+        hashes = list()
+        for tag in data[2:]:
+            sample_match = re.search(r"<a.*>(.*)</a>", tag)
+            sample = sample_match[sample_match.lastindex].split(".")[0]
+            requests.post(self.api_url, json={"hash": sample, "family": family})
+
