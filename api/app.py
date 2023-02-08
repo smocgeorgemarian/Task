@@ -42,9 +42,9 @@ def add_sample():
 @app.route('/hashes/<string:hash_value>', methods=['GET'])
 def get_family_by_hash(hash_value: str):
     sample = Sample.query.filter_by(hash=hash_value).first()
-    if sample is not None:
-        return sample.family, 200
-    return f"Sample with hash {hash_value} could not be found", 404
+    if sample is None:
+        return f"Sample with hash {hash_value} could not be found", 404
+    return sample.family, 200
 
 
 @app.route('/families/<string:family>', methods=['GET'])

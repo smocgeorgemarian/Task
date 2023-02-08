@@ -4,9 +4,9 @@ from selenium.webdriver.common.by import By
 
 
 class Scrapper:
-    def __init__(self, URL, api_URL):
-        self.URL = URL
-        self.api_URL = api_URL
+    def __init__(self, url, api_url):
+        self.URL = url
+        self.api_URL = api_url
         self.driver = webdriver.Firefox()
         self.processed_data = dict()
 
@@ -20,14 +20,13 @@ class Scrapper:
     def process_family(self, row) -> None:
         family = row.text.split("\n")[0]
 
-        samples_URL = f"{self.URL}{family}/Samples/"
+        samples_url = f"{self.URL}{family}/Samples/"
         samples_driver = webdriver.Firefox()
-        samples_driver.get(samples_URL)
+        samples_driver.get(samples_url)
         hashes = map(lambda x: x.text.split('\n')[0],
                      samples_driver.find_elements(By.XPATH, '/html/body/table/tbody/tr')[1:])
         samples_driver.quit()
         self.processed_data[family] = hashes
-        a = 1
 
     def pretty_print_data(self):
         print(self.processed_data)
