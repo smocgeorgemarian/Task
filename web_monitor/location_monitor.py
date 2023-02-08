@@ -55,6 +55,7 @@ class LocationMonitor:
     def __run__(self) -> tuple:
         self.families_count = defaultdict(lambda: 0)
         self.total_count = 0
+        self.malwares_count = 0
         try:
             self.get_all_data()
         except Exception as e:

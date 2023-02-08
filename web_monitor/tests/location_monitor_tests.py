@@ -34,7 +34,9 @@ class MyTestCase(unittest.TestCase):
         # Act
         data = self.monitor.__run__()
         # Assert
-        self.assertEqual(3, data[1][b"Family"])
+        self.assertEqual(2, data[0])
+        self.assertEqual(1, data[1][b"Family1"])
+        self.assertEqual(1, data[1][b"Family3"])
 
 
 if __name__ == '__main__':
